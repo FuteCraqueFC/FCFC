@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCFC</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #101114;
+    color: #f1f1f1;
+}
+
+header {
+    background: #181a20;
+    padding: 22px;
+    border-bottom: 1px solid #30333b;
+}
+
+header h1 {
+    margin: 0 0 8px;
+    font-size: 26px;
+}
+
+header p {
+    margin: 0;
+    color: #aaa;
+}
+
+.container {
+    width: min(1400px, 94%);
+    margin: 25px auto;
+}
+
+.controls {
+    background: #181a20;
+    border: 1px solid #30333b;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: end;
+}
+
+.control {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.control label {
+    font-size: 13px;
+    color: #aaa;
+}
+
+input {
+    background: #0f1013;
+    border: 1px solid #3a3d45;
+    color: white;
+    border-radius: 7px;
+    padding: 10px;
+    width: 130px;
+}
+
+button {
+    border: 0;
+    border-radius: 7px;
+    padding: 11px 16px;
+    cursor: pointer;
+    background: #d4af37;
+    color: #111;
+    font-weight: bold;
+}
+
+button:hover {
+    filter: brightness(0.9);
+}
+
+button.danger {
+    background: #b83232;
+    color: white;
+}
+
+.season-title {
+    margin: 30px 0 15px;
+    font-size: 23px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+}
+
+.card {
+    background: #181a20;
+    border: 1px solid #30333b;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.card h3 {
+    margin: 0 0 12px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #2b2e35;
+    padding: 6px 0;
+}
+
+.stat-row:last-child {
+    border-bottom: 0;
+}
+
+.stat-label {
+    color: #aaa;
+}
+
+.stat-value {
+    font-weight: bold;
+}
+
+.stars {
+    letter-spacing: 1px;
+    color: #d4af37;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #181a20;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+th,
+td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #2b2e35;
+    text-align: center;
+}
+
+th {
+    background: #20232a;
+    color: #bbb;
+    font-size: 13px;
+}
+
+td:nth-child(2) {
+    text-align: left;
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+.champion {
+    font-weight: bold;
+}
+
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.history-box {
+    background: #181a20;
+    border: 1px solid #30333b;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.history-box h3 {
+    margin-top: 0;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #2b2e35;
+}
+
+.history-item:last-child {
+    border-bottom: 0;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 7px;
+    border-radius: 5px;
+    background: #292c33;
+    font-size: 12px;
+}
+
+.log {
+    margin-top: 20px;
+    background: #181a20;
+    border: 1px solid #30333b;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.log-line {
+    padding: 5px 0;
+    color: #bbb;
+    border-bottom: 1px solid #272a30;
+}
+
+.log-line:last-child {
+    border-bottom: 0;
+}
+
+.rules {
+    margin-top: 25px;
+    background: #181a20;
+    border: 1px solid #30333b;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.rules li {
+    margin: 8px 0;
+    color: #c5c5c5;
+}
+
+.small {
+    color: #888;
+    font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Simulador de Temporada.</h1>
+    <p>Simulação de temporadas completas com evolução dos clubes, títulos, promoção e rebaixamento.</p>
+</header>
+
+<div class="container">
+
+    <div class="controls">
+        <div class="control">
+            <label>Temporada inicial</label>
+            <input id="startSeason" type="number" value="2026">
+        </div>
+
+        <div class="control">
+            <label>Temporadas</label>
+            <input id="seasonCount" type="number" value="1" min="1">
+        </div>
+
+        <button onclick="simulateFromInput()">SIMULAR TEMPORADA</button>
+        <button onclick="simulateTen()">+10 TEMPORADAS</button>
+        <button class="danger" onclick="resetSimulator()">RESETAR</button>
+        <button onclick="saveGame()">SALVAR JOGO</button>
+        <button onclick="if(confirm('Carregar o último jogo salvo? Isso substitui o estado atual.')) { loadGame(); render(); }">CARREGAR JOGO</button>
+        <button onclick="hideTeams()">OCULTAR TIMES</button>
+        <button onclick="showTeams()">DESOCULTAR TIMES</button>
+    </div>
+
+    <h2 class="season-title">Temporada atual: <span id="currentSeasonDisplay">2026</span></h2>
+
+    <h2>Série A</h2>
+    <div id="serieAClubs" class="grid"></div>
+
+    <h2>Série B</h2>
+    <div id="serieBClubs" class="grid"></div>
+
+    <h2>Série C</h2>
+    <div id="serieCClubs" class="grid"></div>
+
+    <h2>Classificação — Série A</h2>
+    <div id="tableA"></div>
+
+    <h2>Classificação — Série B</h2>
+    <div id="tableB"></div>
+
+    <h2>Classificação — Série C</h2>
+    <div id="tableC"></div>
+
+    <h2>Histórico de títulos</h2>
+
+    <div class="history-grid">
+
+        <div class="history-box">
+            <h3>Campeões da Série A</h3>
+            <div id="championHistoryA"></div>
+        </div>
+
+        <div class="history-box">
+            <h3>Campeões da Série B</h3>
+            <div id="championHistoryB"></div>
+        </div>
+
+        <div class="history-box">
+            <h3>Campeões da Série C</h3>
+            <div id="championHistoryC"></div>
+        </div>
+
+    </div>
+
+    <div class="log">
+        <h3>Últimos acontecimentos</h3>
+        <div id="eventLog"></div>
+    </div>
+
+    <div class="rules">
+        <h3>Regras da simulação</h3>
+
+        <ul>
+            <li>Cada divisão possui 20 clubes.</li>
+            <li>Cada clube disputa 38 partidas por temporada.</li>
+            <li>Todos enfrentam todos duas vezes.</li>
+            <li>Os 2 primeiros da Série B sobem para a Série A. E os outros 4 primeiros disputam um Playoff para decidir as 2 vagas restantes.</li>
+            <li>Os 4 últimos da Série A descem para a Série B.</li>
+            <li>Os 4 primeiros da Série C sobem para a Série B.</li>
+            <li>Os 4 últimos da Série B descem para a Série C.</li>
+            <li>O campeão de cada temporada é registrado no histórico de títulos da respectiva divisão.</li>
+        </ul>
+
+        <p class="small">
+            Os resultados são gerados aleatoriamente de acordo com a diferença
+            de força entre os clubes.
+        </p>
+    </div>
+
+</div>
+
+<script>
+
+/* =========================================================
+   DADOS INICIAIS — SÉRIE A
+========================================================= */
+
+const initialSerieAData = [
+    // [Nome, ATA, MEI, DEF, MinPotencial, MaxPotencial]
+    ["Athletico-PR", 79, 77, 75, 72, 76],
+    ["Atlético-MG", 76, 77, 74, 73, 77],
+    ["Bahia", 75, 76, 74, 74, 78],
+    ["Botafogo", 76, 78, 75, 72, 76],
+    ["Chapecoense", 72, 71, 70, 69, 73],
+    ["Corinthians", 80, 77, 74, 72, 76],
+    ["Coritiba", 74, 74, 74, 71, 75],
+    ["Cruzeiro", 77, 75, 75, 73, 77],
+    ["Flamengo", 79, 82, 78, 76, 80],
+    ["Fluminense", 78, 77, 76, 76, 80],
+    ["Grêmio", 77, 76, 72, 71, 75],
+    ["Internacional", 76, 74, 74, 71, 75],
+    ["Mirassol", 73, 72, 72, 68, 72],
+    ["Palmeiras", 79, 80, 80, 77, 81],
+    ["RB Bragantino", 76, 77, 76, 72, 76],
+    ["Remo", 72, 71, 70, 67, 71],
+    ["Santos", 76, 75, 70, 72, 76],
+    ["São Paulo", 76, 75, 75, 72, 76],
+    ["Vasco", 75, 73, 72, 72, 76],
+    ["Vitória", 75, 72, 72, 69, 73]
+];
+
+/* =========================================================
+   DADOS INICIAIS — SÉRIE B
+========================================================= */
+
+const initialSerieBData = [
+    // [Nome, ATA, MEI, DEF, MinPotencial, MaxPotencial]
+    ["São Bernardo", 71, 70, 69, 70, 74],
+    ["Náutico", 67, 68, 68, 66, 70],
+    ["Sport Recife", 70, 70, 66, 69, 73],
+    ["Vila Nova", 72, 71, 70, 71, 75],
+    ["Fortaleza", 72, 72, 71, 70, 74],
+    ["Goiás", 70, 68, 69, 68, 72],
+    ["Novorizontino", 71, 71, 70, 69, 73],
+    ["CRB", 68, 69, 68, 66, 70],
+    ["Criciúma", 70, 67, 67, 67, 71],
+    ["Athletic", 69, 68, 68, 65, 69],
+    ["Ceará", 70, 69, 68, 70, 74],
+    ["Juventude", 71, 71, 70, 69, 73],
+    ["Operário Ferrov.", 69, 70, 69, 66, 70],
+    ["Atlético-GO", 72, 70, 70, 68, 72],
+    ["Avaí", 67, 67, 66, 64, 68],
+    ["Cuiabá", 68, 67, 71, 66, 70],
+    ["Botafogo-SP", 68, 67, 67, 64, 68],
+    ["Londrina", 66, 66, 65, 62, 66],
+    ["Ponte Preta", 53, 59, 50, 54, 58],
+    ["América-MG", 65, 66, 63, 62, 66]
+];
+
+/* =========================================================
+   DADOS INICIAIS — SÉRIE C
+========================================================= */
+
+const initialSerieCData = [
+    // [Nome, ATA, MEI, DEF, MinPotencial, MaxPotencial]
+    ["Amazonas", 61, 61, 61, 59, 63],
+    ["Anápolis", 58, 57, 58, 56, 60],
+    ["Barra-SC", 60, 60, 59, 59, 63],
+    ["Botafogo-PB", 61, 63, 61, 61, 65],
+    ["Brusque", 66, 65, 64, 63, 67],
+    ["Caxias", 60, 59, 60, 61, 65],
+    ["Confiança", 56, 57, 56, 55, 59],
+    ["Ferroviária", 67, 67, 63, 65, 69],
+    ["Figueirense", 62, 63, 62, 59, 63],
+    ["Floresta", 64, 65, 63, 61, 65],
+    ["Guarani", 62, 62, 61, 57, 61],
+    ["Inter de Limeira", 66, 66, 64, 70, 74],
+    ["Itabaiana", 57, 57, 58, 56, 60],
+    ["Ituano", 59, 58, 59, 58, 62],
+    ["Maranhão", 61, 60, 59, 59, 63],
+    ["Maringá", 65, 66, 65, 63, 67],
+    ["Paysandu", 63, 63, 62, 63, 67],
+    ["Santa Cruz", 67, 66, 66, 65, 69],
+    ["Volta Redonda", 60, 61, 60, 58, 62],
+    ["Ypiranga-RS", 62, 63, 62, 60, 64]
+];
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+let serieA = [];
+let serieB = [];
+let serieC = [];
+
+let currentSeason = 2026;
+
+let championHistoryA = {};
+let championHistoryB = {};
+let championHistoryC = {};
+
+let lastStandingsA = [];
+let lastStandingsB = [];
+let lastStandingsC = [];
+
+let eventLog = [];
+
+/* =========================================================
+   CRIAÇÃO DOS CLUBES
+========================================================= */
+
+function createClub(name, ata, mei, def, minPot, maxPot, division) {
+
+    const normalGer = Math.round((ata + mei + def) / 3);
+
+    return {
+        name,
+        originalName: name, // nome fixo original, usado pra reconectar dados no reset
+        ata,
+        mei,
+        def,
+        normalGer,
+        ger: normalGer,
+        division,
+        minPot,
+        maxPot,
+        escudo: null,   // <-- novo campo, guarda a imagem escolhida
+
+        points: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        gf: 0,
+        ga: 0,
+        gd: 0
+    };
+}
+
+/* =========================================================
+   1. CORREÇÃO CRÍTICA DO MAPEAMENTO (Fim definitivo dos pulos)
+========================================================= */
+function createInitialClubs() {
+
+    // Agora o sistema lê estritamente cada coluna isolada da sua planilha
+    serieA = initialSerieAData.map(data =>
+        createClub(data[0], data[1], data[2], data[3], data[4], data[5], "A")
+    );
+
+    serieB = initialSerieBData.map(data =>
+        createClub(data[0], data[1], data[2], data[3], data[4], data[5], "B")
+    );
+
+    serieC = initialSerieCData.map(data =>
+        createClub(data[0], data[1], data[2], data[3], data[4], data[5], "C")
+    );
+}
+
+function handleEscudoUpload(club, event, imgElement, botaoElement) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        club.escudo = e.target.result;
+        imgElement.src = club.escudo;
+        imgElement.style.visibility = "visible";
+        botaoElement.style.display = "none";
+    };
+    reader.readAsDataURL(file);
+}
+
+/* =========================================================
+   ESTRELAS
+========================================================= */
+
+function getStarsFromGer(ger) {
+
+    if (ger >= 83) return 5;
+    if (ger >= 79) return 4.5;
+    if (ger >= 75) return 4;
+    if (ger >= 71) return 3.5;
+    if (ger >= 67) return 3;
+    if (ger >= 63) return 2.5;
+    if (ger >= 59) return 2;
+    if (ger >= 55) return 1.5;
+    if (ger >= 51) return 1;
+    return 0.5;
+}
+
+function starsText(stars) {
+    return "★".repeat(Math.floor(stars)) +
+           (stars % 1 !== 0 ? "½" : "");
+}
+
+/* =========================================================
+   LIMITES (Agora recebendo corretamente os valores da planilha)
+========================================================= */
+
+function getLimits(club) {
+
+    return {
+        min: Math.max(0, club.minPot),   // nunca deixa o piso passar de 0
+        max: Math.min(99, club.maxPot)   // nunca deixa o teto passar de 99
+    };
+}
+
+/* =========================================================
+   EVOLUÇÃO
+========================================================= */
+function evolveClub(club) {
+
+    // Chance de a FAIXA de potencial (min/max) mudar neste ano
+    const chance = Math.random();
+
+    if (chance < 0.005) {
+        // 10% - aumenta o potencial mínimo e máximo em 1 ponto
+        club.minPot += 1;
+        club.maxPot += 1;
+    } else if (chance < 0.01) {
+        // 10% - diminui o potencial mínimo e máximo em 1 ponto
+        club.minPot -= 1;
+        club.maxPot -= 1;
+    }
+    // 99% restante - mantém a faixa de potencial igual
+
+    // Segurança: nunca deixar o mínimo passar do máximo
+    if (club.minPot > club.maxPot) {
+        const temp = club.minPot;
+        club.minPot = club.maxPot;
+        club.maxPot = temp;
+    }
+
+    const limits = getLimits(club);
+
+    // Faz o Overall oscilar dentro da faixa (pode subir OU descer, não só subir)
+    let disponiveis = [];
+    if (club.ata > limits.min || club.ata < limits.max) disponiveis.push("ata");
+    if (club.mei > limits.min || club.mei < limits.max) disponiveis.push("mei");
+    if (club.def > limits.min || club.def < limits.max) disponiveis.push("def");
+
+    if (disponiveis.length > 0) {
+
+        const escolhido = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+        const direcao = Math.random() < 0.5 ? 1 : -1;
+
+        if (escolhido === "ata") {
+            club.ata = Math.max(limits.min, Math.min(limits.max, club.ata + direcao));
+        }
+        if (escolhido === "mei") {
+            club.mei = Math.max(limits.min, Math.min(limits.max, club.mei + direcao));
+        }
+        if (escolhido === "def") {
+            club.def = Math.max(limits.min, Math.min(limits.max, club.def + direcao));
+        }
+    }
+
+    club.ger = Math.round((club.ata + club.mei + club.def) / 3);
+    club.ger = Math.max(limits.min, Math.min(limits.max, club.ger));
+}
+/* =========================================================
+   3. TRANSIÇÃO DE DIVISÃO LIMPA (Sem inflar atributos)
+========================================================= */
+function changeDivisionLevel(club, amount, newDivision) {
+    // Apenas muda o texto da divisão, sem dar pontos grátis ao subir ou descer
+    club.division = newDivision;
+
+    // Recalcula o GER com base no estado atual dos três setores
+    club.ger = Math.round((club.ata + club.mei + club.def) / 3);
+}
+
+/* =========================================================
+   PROMOÇÃO / REBAIXAMENTO
+========================================================= */
+
+function changeDivisionLevel(club, amount, newDivision) {
+
+    club.division = newDivision;
+
+    const limits = getLimits(club);
+
+    club.ata = Math.max(limits.min, Math.min(limits.max, club.ata + amount));
+    club.mei = Math.max(limits.min, Math.min(limits.max, club.mei + amount));
+    club.def = Math.max(limits.min, Math.min(limits.max, club.def + amount));
+
+    club.ger = Math.round((club.ata + club.mei + club.def) / 3);
+    club.ger = Math.max(limits.min, Math.min(limits.max, club.ger));
+}
+
+/* =========================================================
+   RESET DAS ESTATÍSTICAS DE UMA TEMPORADA
+========================================================= */
+
+function resetSeasonStats(club) {
+
+    club.points = 0;
+    club.wins = 0;
+    club.draws = 0;
+    club.losses = 0;
+    club.gf = 0;
+    club.ga = 0;
+    club.gd = 0;
+}
+
+/* =========================================================
+   RESULTADOS
+========================================================= */
+
+function getMatchProbabilities(team1, team2) {
+
+    const difference = Math.abs(team1.ger - team2.ger);
+
+    let strongerWin;
+    let draw;
+    let weakerWin;
+
+    if (difference <= 0) {
+        strongerWin = 0.35;
+        draw = 0.30;
+        weakerWin = 0.35;
+    } else if (difference <= 1) {
+        strongerWin = 0.40;
+        draw = 0.30;
+        weakerWin = 0.30;
+    } else if (difference <= 2) {
+        strongerWin = 0.45;
+        draw = 0.25;
+        weakerWin = 0.30;
+    } else if (difference <= 3) {
+        strongerWin = 0.50;
+        draw = 0.25;
+        weakerWin = 0.25;
+    } else if (difference <= 4) {
+        strongerWin = 0.55;
+        draw = 0.20;
+        weakerWin = 0.25;
+    } else if (difference <= 5) {
+        strongerWin = 0.60;
+        draw = 0.20;
+        weakerWin = 0.20;
+    } else if (difference <= 6) {
+        strongerWin = 0.65;
+        draw = 0.15;
+        weakerWin = 0.20;
+    } else if (difference <= 7) {
+        strongerWin = 0.70;
+        draw = 0.15;
+        weakerWin = 0.15;
+    } else if (difference <= 8) {
+        strongerWin = 0.75;
+        draw = 0.10;
+        weakerWin = 0.15;
+    } else if (difference <= 9) {
+        strongerWin = 0.80;
+        draw = 0.10;
+        weakerWin = 0.10;
+    } else if (difference <= 10) {
+        strongerWin = 0.85;
+        draw = 0.05;
+        weakerWin = 0.10;
+    } else if (difference <= 11) {
+        strongerWin = 0.90;
+        draw = 0.05;
+        weakerWin = 0.05;
+    } else if (difference <= 12) {
+        strongerWin = 0.95;
+        draw = 0.02;
+        weakerWin = 0.03;
+    } else if (difference <= 13) {
+        strongerWin = 0.96;
+        draw = 0.02;
+        weakerWin = 0.02;
+    } else {
+        strongerWin = 0.98;
+        draw = 0.01;
+        weakerWin = 0.01; 
+    }
+
+    return {
+        strongerWin,
+        draw,
+        weakerWin
+    };
+}
+
+function generateGoals(type) {
+
+    if (type === "winner") {
+        return Math.floor(Math.random() * 4) + 1;
+    }
+
+    return Math.floor(Math.random() * 4);
+}
+
+function simulateMatch(team1, team2) {
+
+    const probabilities = getMatchProbabilities(team1, team2);
+
+    const team1IsStronger = team1.ger > team2.ger;
+    const team2IsStronger = team2.ger > team1.ger;
+
+    const random = Math.random();
+
+    let result;
+
+    if (random < probabilities.draw) {
+
+        result = "draw";
+
+    } else {
+
+        const strongerWins =
+            random < probabilities.draw + probabilities.strongerWin;
+
+        if (team1.ger === team2.ger) {
+
+            result = Math.random() < 0.5
+                ? "team1"
+                : "team2";
+
+        } else if (team1IsStronger) {
+
+            result = strongerWins
+                ? "team1"
+                : "team2";
+
+        } else {
+
+            result = strongerWins
+                ? "team2"
+                : "team1";
+        }
+    }
+
+    let goals1 = 0;
+    let goals2 = 0;
+
+    if (result === "draw") {
+
+        goals1 = Math.floor(Math.random() * 4);
+        goals2 = goals1;
+
+    } else if (result === "team1") {
+
+        goals1 = generateGoals("winner");
+        goals2 = Math.floor(Math.random() * goals1);
+
+    } else {
+
+        goals2 = generateGoals("winner");
+        goals1 = Math.floor(Math.random() * goals2);
+    }
+
+    team1.gf += goals1;
+    team1.ga += goals2;
+
+    team2.gf += goals2;
+    team2.ga += goals1;
+
+    if (goals1 > goals2) {
+
+        team1.points += 3;
+        team1.wins++;
+
+        team2.losses++;
+
+    } else if (goals2 > goals1) {
+
+        team2.points += 3;
+        team2.wins++;
+
+        club1 = team1.losses++; // Mantido idêntico ao seu escopo original de atribuição de derrota
+
+    } else {
+
+        team1.points++;
+        team2.points++;
+
+        team1.draws++;
+        team2.draws++;
+    }
+}
+
+/* =========================================================
+   SIMULAR DIVISÃO
+========================================================= */
+
+function simulateDivision(clubs) {
+
+    clubs.forEach(resetSeasonStats);
+
+    for (let i = 0; i < clubs.length; i++) {
+
+        for (let j = i + 1; j < clubs.length; j++) {
+
+            simulateMatch(clubs[i], clubs[j]);
+            simulateMatch(clubs[j], clubs[i]);
+        }
+    }
+
+    clubs.forEach(club => {
+        club.gd = club.gf - club.ga;
+    });
+
+    clubs.sort((a, b) => {
+
+        if (b.points !== a.points)
+            return b.points - a.points;
+
+        if (b.gd !== a.gd)
+            return b.gd - a.gd;
+
+        if (b.gf !== a.gf)
+            return b.gf - a.gf;
+
+        return b.wins - a.wins;
+    });
+
+    return clubs;
+}
+
+/* =========================================================
+   HISTÓRICO DE TÍTULOS
+========================================================= */
+
+function addTitle(history, clubName) {
+
+    if (!history[clubName]) {
+        history[clubName] = 0;
+    }
+
+    history[clubName]++;
+}
+
+/* =========================================================
+   REPESCAGEM DA SÉRIE B
+========================================================= */
+
+// Simula um jogo só pra saber o placar (NÃO mexe em pontos/gols da tabela)
+function playMatchGoals(team1, team2) {
+
+    const probabilities = getMatchProbabilities(team1, team2);
+    const team1IsStronger = team1.ger > team2.ger;
+    const random = Math.random();
+
+    let result;
+
+    if (random < probabilities.draw) {
+        result = "draw";
+    } else {
+        const strongerWins =
+            random < probabilities.draw + probabilities.strongerWin;
+
+        if (team1.ger === team2.ger) {
+            result = Math.random() < 0.5 ? "team1" : "team2";
+        } else if (team1IsStronger) {
+            result = strongerWins ? "team1" : "team2";
+        } else {
+            result = strongerWins ? "team2" : "team1";
+        }
+    }
+
+    let goals1 = 0;
+    let goals2 = 0;
+
+    if (result === "draw") {
+        goals1 = Math.floor(Math.random() * 4);
+        goals2 = goals1;
+    } else if (result === "team1") {
+        goals1 = generateGoals("winner");
+        goals2 = Math.floor(Math.random() * goals1);
+    } else {
+        goals2 = generateGoals("winner");
+        goals1 = Math.floor(Math.random() * goals2);
+    }
+
+    return { goals1, goals2 };
+}
+
+// Simula uma disputa de pênaltis simples (5 cobranças + morte súbita se empatar)
+function simulatePenalties(teamA, teamB) {
+
+    let placarA = 0;
+    let placarB = 0;
+
+    for (let i = 0; i < 5; i++) {
+        if (Math.random() < 0.75) placarA++;
+        if (Math.random() < 0.75) placarB++;
+    }
+
+    while (placarA === placarB) {
+        if (Math.random() < 0.75) placarA++;
+        if (Math.random() < 0.75) placarB++;
+    }
+
+    return {
+        timeA: teamA,
+        timeB: teamB,
+        placarA,
+        placarB,
+        vencedor: placarA > placarB ? teamA : teamB
+    };
+}
+
+// Confronto de ida e volta. "melhor" = quem ficou mais bem colocado na tabela
+function playPlayoffTie(melhor, pior) {
+
+    const ida = playMatchGoals(pior, melhor);
+    const volta = playMatchGoals(melhor, pior);
+
+    const golsMelhor = ida.goals2 + volta.goals1;
+    const golsPior = ida.goals1 + volta.goals2;
+
+    let vencedor;
+    let penaltis = null;
+
+    if (golsPior > golsMelhor) {
+        vencedor = pior;
+    } else if (golsMelhor > golsPior) {
+        vencedor = melhor;
+    } else {
+        // Empate no agregado - vai para os pênaltis
+        penaltis = simulatePenalties(melhor, pior);
+        vencedor = penaltis.vencedor;
+    }
+
+    const perdedor = vencedor === melhor ? pior : melhor;
+
+    return { melhor, pior, vencedor, perdedor, golsMelhor, golsPior, penaltis };
+}
+
+function logRepescagem(tie) {
+
+    if (tie.penaltis) {
+
+        const placarVencedor = tie.vencedor === tie.melhor ? tie.penaltis.placarA : tie.penaltis.placarB;
+        const placarPerdedor = tie.vencedor === tie.melhor ? tie.penaltis.placarB : tie.penaltis.placarA;
+
+        eventLog.unshift(
+            `Repescagem: ${tie.vencedor.name} eliminou ${tie.perdedor.name} nos pênaltis (agregado ${tie.golsMelhor}x${tie.golsPior}, pênaltis ${placarVencedor}x${placarPerdedor}).`
+        );
+
+    } else {
+
+        const placarVencedor = tie.vencedor === tie.melhor ? tie.golsMelhor : tie.golsPior;
+        const placarPerdedor = tie.vencedor === tie.melhor ? tie.golsPior : tie.golsMelhor;
+
+        eventLog.unshift(
+            `Repescagem: ${tie.vencedor.name} eliminou ${tie.perdedor.name} (agregado ${placarVencedor}x${placarPerdedor}).`
+        );
+    }
+}
+
+/* =========================================================
+   PROMOÇÃO E REBAIXAMENTO (Adaptado para incluir Série C)
+========================================================= */
+
+function performMovement(standingsA, standingsB, resultadoC) {
+
+    const relegatedA = standingsA.slice(16, 20);
+
+    const diretosB = standingsB.slice(0, 2);
+    const tie1 = playPlayoffTie(standingsB[2], standingsB[5]);
+    const tie2 = playPlayoffTie(standingsB[3], standingsB[4]);
+
+    logRepescagem(tie2);
+    logRepescagem(tie1);
+
+    const promotedB = [...diretosB, tie1.vencedor, tie2.vencedor];
+
+    const relegatedB = standingsB.slice(16, 20);
+    const promotedC = resultadoC.promovidosC;
+
+    relegatedA.forEach(club => {
+        const queda = Math.floor(Math.random() * 3);
+        changeDivisionLevel(club, -queda, "B");
+        eventLog.unshift(`${club.name} foi rebaixado para o Brasileirão Série B.`);
+    });
+
+    promotedB.forEach(club => {
+        const subida = Math.floor(Math.random() * 3);
+        changeDivisionLevel(club, subida, "A");
+        eventLog.unshift(`${club.name} foi promovido para o Brasileirão Série A.`);
+    });
+
+    relegatedB.forEach(club => {
+        const queda = Math.floor(Math.random() * 3);
+        changeDivisionLevel(club, -queda, "C");
+        eventLog.unshift(`${club.name} foi rebaixado para o Brasileirão Série C.`);
+    });
+
+    promotedC.forEach(club => {
+        const subida = Math.floor(Math.random() * 3);
+        changeDivisionLevel(club, subida, "B");
+        eventLog.unshift(`${club.name} foi promovido para o Brasileirão Série B.`);
+    });
+
+    const ficamNaB = standingsB.slice(0, 16).filter(club => !promotedB.includes(club));
+    const ficamNaC = resultadoC.fase1standings.filter(club => !promotedC.includes(club));
+
+    serieA = standingsA.slice(0, 16).concat(promotedB);
+    serieB = ficamNaB.concat(promotedC).concat(relegatedA);
+    serieC = ficamNaC.concat(relegatedB);
+
+    serieA.forEach(club => club.division = "A");
+    serieB.forEach(club => club.division = "B");
+    serieC.forEach(club => club.division = "C");
+}
+
+/* =========================================================
+   EVOLUIR TODOS OS CLUBES (Incluída a Série C)
+========================================================= */
+
+function evolveAllClubs() {
+
+    serieA.forEach(evolveClub);
+    serieB.forEach(evolveClub);
+    serieC.forEach(evolveClub);
+}
+
+/* =========================================================
+   SIMULAÇÃO DE UMA TEMPORADA (Correção de Arrays e Médias)
+========================================================= */
+
+function simulateSeason() {
+
+    const season = currentSeason;
+
+    lastStandingsA = simulateDivision(serieA);
+    lastStandingsB = simulateDivision(serieB);
+
+    const resultadoC = simulateSerieC();
+    lastStandingsC = resultadoC.fase1standings;
+
+    const championA = lastStandingsA[0];
+    const championB = lastStandingsB[0];
+    const championC = resultadoC.campeaoC;
+
+    addTitle(championHistoryA, championA.name);
+    addTitle(championHistoryB, championB.name);
+    addTitle(championHistoryC, championC.name);
+
+    eventLog.unshift(`${season}: ${championA.name} foi campeão da Série A.`);
+    eventLog.unshift(`${season}: ${championB.name} foi campeão da Série B.`);
+    eventLog.unshift(`${season}: ${championC.name} foi campeão da Série C.`);
+
+    performMovement(lastStandingsA, lastStandingsB, resultadoC);
+
+    evolveAllClubs();
+
+    currentSeason++;
+
+    render();
+}
+
+/* =========================================================
+   SIMULAR N TEMPORADAS
+========================================================= */
+
+function simulateFromInput() {
+
+    const count =
+        Math.max(
+            1,
+            parseInt(
+                document.getElementById("seasonCount").value
+            ) || 1
+        );
+
+    for (let i = 0; i < count; i++) {
+        simulateSeason();
+    }
+}
+
+function simulateTen() {
+
+    for (let i = 0; i < 10; i++) {
+        simulateSeason();
+    }
+}
+
+/* =========================================================
+   RENDER CLUBES
+========================================================= */
+
+/* =========================================================
+   OCULTAR / DESOCULTAR TIMES
+========================================================= */
+
+function hideTeams() {
+    document.getElementById("serieAClubs").style.display = "none";
+    document.getElementById("serieBClubs").style.display = "none";
+    document.getElementById("serieCClubs").style.display = "none";
+}
+
+function showTeams() {
+    document.getElementById("serieAClubs").style.display = "grid";
+    document.getElementById("serieBClubs").style.display = "grid";
+    document.getElementById("serieCClubs").style.display = "grid";
+}
+
+function renderClubCards(clubs, elementId) {
+
+    const container = document.getElementById(elementId);
+    container.innerHTML = "";
+
+    clubs.forEach(club => {
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        // Cabeçalho: escudo + nome
+        const header = document.createElement("div");
+        header.style.display = "flex";
+        header.style.alignItems = "center";
+        header.style.gap = "10px";
+        header.style.marginBottom = "12px";
+
+        const escudoImg = document.createElement("img");
+        escudoImg.src = club.escudo || "";
+        escudoImg.style.width = "36px";
+        escudoImg.style.height = "36px";
+        escudoImg.style.borderRadius = "6px";
+        escudoImg.style.objectFit = "cover";
+        escudoImg.style.background = "#20232a";
+        escudoImg.style.cursor = "pointer";
+        escudoImg.title = "Clique para trocar o escudo";
+        escudoImg.style.visibility = club.escudo ? "visible" : "hidden";
+
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+        fileInput.style.display = "none";
+
+        const escudoBtn = document.createElement("button");
+        escudoBtn.textContent = "+ Escudo";
+        escudoBtn.style.padding = "6px 10px";
+        escudoBtn.style.fontSize = "12px";
+        escudoBtn.style.display = club.escudo ? "none" : "inline-block";
+
+        fileInput.onchange = (e) => handleEscudoUpload(club, e, escudoImg, escudoBtn);
+        escudoImg.onclick = () => fileInput.click();
+        escudoBtn.onclick = () => fileInput.click();
+
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = club.name;
+        nameInput.style.background = "transparent";
+        nameInput.style.border = "none";
+        nameInput.style.borderBottom = "1px solid transparent";
+        nameInput.style.color = "#f1f1f1";
+        nameInput.style.fontSize = "17px";
+        nameInput.style.fontWeight = "bold";
+        nameInput.style.width = "100%";
+        nameInput.style.padding = "2px 0";
+
+        nameInput.oninput = () => {
+            club.name = nameInput.value;
+        };
+        nameInput.onfocus = () => { nameInput.style.borderBottom = "1px solid #d4af37"; };
+        nameInput.onblur = () => { nameInput.style.borderBottom = "1px solid transparent"; };
+
+        header.appendChild(escudoImg);
+        header.appendChild(escudoBtn);
+        header.appendChild(nameInput);
+        header.appendChild(fileInput);
+        card.appendChild(header);
+
+        // Linha de estrelas (atualizada ao editar os atributos)
+        const starsRow = document.createElement("div");
+        starsRow.className = "stat-row";
+
+        function atualizarEstrelas() {
+            const media = Math.round((club.ata + club.mei + club.def) / 3);
+            const stars = getStarsFromGer(media);
+            starsRow.querySelector(".stat-value").textContent = starsText(stars);
+        }
+
+        // ATA / MEI / DEF editáveis
+        ["ata", "mei", "def"].forEach(campo => {
+            const row = document.createElement("div");
+            row.className = "stat-row";
+
+            const label = document.createElement("span");
+            label.className = "stat-label";
+            label.textContent = campo.toUpperCase();
+
+            const input = document.createElement("input");
+            input.type = "number";
+            input.value = club[campo];
+            input.style.width = "60px";
+            input.style.padding = "4px";
+
+            input.oninput = () => {
+                const valor = parseInt(input.value);
+                club[campo] = isNaN(valor) ? 0 : valor;
+                atualizarEstrelas();
+            };
+
+            row.appendChild(label);
+            row.appendChild(input);
+            card.appendChild(row);
+        });
+
+        starsRow.innerHTML = `
+            <span class="stat-label">Estrelas</span>
+            <span class="stat-value stars">${starsText(getStarsFromGer(Math.round((club.ata + club.mei + club.def) / 3)))}</span>
+        `;
+        card.appendChild(starsRow);
+
+        container.appendChild(card);
+    });
+}
+
+/* =========================================================
+   TABELAS
+========================================================= */
+
+function renderTable(clubs, elementId) {
+
+    const container =
+        document.getElementById(elementId);
+
+    let html = `
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Clube</th>
+                    <th>PTS</th>
+                    <th>V</th>
+                    <th>E</th>
+                    <th>D</th>
+                    <th>GP</th>
+                    <th>GC</th>
+                    <th>SG</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    clubs.forEach((club, index) => {
+
+    const escudoHtml = club.escudo
+        ? `<img src="${club.escudo}" style="width:22px;height:22px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:8px;">`
+        : "";
+
+    html += `
+        <tr>
+            <td>${index + 1}</td>
+            <td class="${index === 0 ? "champion" : ""}" style="display:flex;align-items:center;">
+                ${escudoHtml}${club.name}
+            </td>
+            <td>${club.points}</td>
+            <td>${club.wins}</td>
+            <td>${club.draws}</td>
+            <td>${club.losses}</td>
+            <td>${club.gf}</td>
+            <td>${club.ga}</td>
+            <td>${club.gd}</td>
+        </tr>
+    `;
+});
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = html;
+}
+
+function simulateSingleRound(clubs) {
+
+    clubs.forEach(resetSeasonStats);
+
+    for (let i = 0; i < clubs.length; i++) {
+        for (let j = i + 1; j < clubs.length; j++) {
+            simulateMatch(clubs[i], clubs[j]);
+        }
+    }
+
+    clubs.forEach(club => {
+        club.gd = club.gf - club.ga;
+    });
+
+    clubs.sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.gd !== a.gd) return b.gd - a.gd;
+        if (b.gf !== a.gf) return b.gf - a.gf;
+        return b.wins - a.wins;
+    });
+
+    return clubs;
+}
+
+function simulateSerieC() {
+
+    // FASE 1: liga de turno único, 19 rodadas
+    const fase1 = simulateSingleRound(serieC);
+
+    // Os 2 últimos ficam na zona de rebaixamento (sem Série D no jogo, só ficam por último mesmo)
+    const rebaixadosFase1 = fase1.slice(18, 20);
+
+    // Os 8 primeiros avançam para os quadrangulares
+    const classificados = fase1.slice(0, 8);
+
+    // Grupo A: 1º, 3º, 4º, 7º | Grupo B: 2º, 5º, 6º, 8º
+    const grupoA = [classificados[0], classificados[2], classificados[3], classificados[6]];
+    const grupoB = [classificados[1], classificados[4], classificados[5], classificados[7]];
+
+    eventLog.unshift(`Série C - Grupo A: ${grupoA.map(c => c.name).join(", ")}.`);
+    eventLog.unshift(`Série C - Grupo B: ${grupoB.map(c => c.name).join(", ")}.`);
+
+    // Quadrangulares: turno e returno dentro do próprio grupo
+    const finalGrupoA = simulateDivision(grupoA);
+    const finalGrupoB = simulateDivision(grupoB);
+
+    // Os 2 melhores de cada grupo sobem para a Série B
+    const promovidosC = [
+        finalGrupoA[0], finalGrupoA[1],
+        finalGrupoB[0], finalGrupoB[1]
+    ];
+
+    // Os líderes de cada grupo decidem o título, em ida e volta
+    const liderA = finalGrupoA[0];
+    const liderB = finalGrupoB[0];
+
+    const ida = playMatchGoals(liderA, liderB);
+    const volta = playMatchGoals(liderB, liderA);
+
+    const golsA = ida.goals1 + volta.goals2;
+    const golsB = ida.goals2 + volta.goals1;
+
+    let campeaoC;
+
+    if (golsA > golsB) {
+        campeaoC = liderA;
+    } else if (golsB > golsA) {
+        campeaoC = liderB;
+    } else {
+        const penaltis = simulatePenalties(liderA, liderB);
+        campeaoC = penaltis.vencedor;
+    }
+
+    eventLog.unshift(
+        `Final da Série C: ${liderA.name} ${golsA} x ${golsB} ${liderB.name} - Campeão: ${campeaoC.name}.`
+    );
+
+    return {
+        fase1standings: fase1,
+        promovidosC,
+        rebaixadosFase1,
+        campeaoC
+    };
+}
+
+/* =========================================================
+   HISTÓRICO DE TÍTULOS
+========================================================= */
+
+function renderTitleHistory(history, elementId) {
+
+    const container =
+        document.getElementById(elementId);
+
+    const entries =
+        Object.entries(history)
+            .sort((a, b) => {
+
+                if (b[1] !== a[1]) {
+                    return b[1] - a[1];
+                }
+
+                return a[0].localeCompare(b[0]);
+            });
+
+    if (entries.length === 0) {
+
+        container.innerHTML =
+            `<p class="small">Nenhum título registrado ainda.</p>`;
+
+        return;
+    }
+
+    container.innerHTML =
+        entries.map(([club, titles]) => `
+            <div class="history-item">
+                <span>${club}</span>
+                <span class="badge">
+                    ${titles} ${titles === 1 ? "título" : "títulos"}
+                </span>
+            </div>
+        `).join("");
+}
+
+/* =========================================================
+   LOG
+========================================================= */
+
+function renderLog() {
+
+    const container =
+        document.getElementById("eventLog");
+
+    const recent =
+        eventLog.slice(0, 20);
+
+    if (recent.length === 0) {
+
+        container.innerHTML =
+            `<div class="small">Nenhum acontecimento ainda.</div>`;
+
+        return;
+    }
+
+    container.innerHTML =
+        recent.map(event => `
+            <div class="log-line">${event}</div>
+        `).join("");
+}
+
+/* =========================================================
+   RENDER GERAL (Atualizado com Série C)
+========================================================= */
+
+function render() {
+
+    document.getElementById(
+        "currentSeasonDisplay"
+    ).textContent = currentSeason;
+
+    renderClubCards(
+        serieA,
+        "serieAClubs"
+    );
+
+    renderClubCards(
+        serieB,
+        "serieBClubs"
+    );
+
+    renderClubCards(
+        serieC,
+        "serieCClubs"
+    );
+
+    renderTable(
+        lastStandingsA,
+        "tableA"
+    );
+
+    renderTable(
+        lastStandingsB,
+        "tableB"
+    );
+
+    renderTable(
+        lastStandingsC,
+        "tableC"
+    );
+
+    renderTitleHistory(
+        championHistoryA,
+        "championHistoryA"
+    );
+
+    renderTitleHistory(
+        championHistoryB,
+        "championHistoryB"
+    );
+
+    renderTitleHistory(
+        championHistoryC,
+        "championHistoryC"
+    );
+
+    renderLog();
+}
+
+/* =========================================================
+   SALVAR / CARREGAR JOGO
+========================================================= */
+
+function saveGame(mostrarAviso = true) {
+
+    const dadosSalvos = {
+        currentSeason,
+        serieA,
+        serieB,
+        serieC,
+        championHistoryA,
+        championHistoryB,
+        championHistoryC,
+        eventLog
+    };
+
+    try {
+        localStorage.setItem("fcfc_save", JSON.stringify(dadosSalvos));
+        if (mostrarAviso) alert("Jogo salvo com sucesso!");
+    } catch (e) {
+        if (mostrarAviso) alert("Não foi possível salvar. Se você usou muitos escudos grandes, tente escudos menores (o espaço de salvamento é limitado).");
+    }
+}
+
+function loadGame() {
+
+    const dados = localStorage.getItem("fcfc_save");
+    if (!dados) return false;
+
+    try {
+        const dadosSalvos = JSON.parse(dados);
+
+        currentSeason = dadosSalvos.currentSeason;
+        serieA = dadosSalvos.serieA;
+        serieB = dadosSalvos.serieB;
+        serieC = dadosSalvos.serieC;
+        championHistoryA = dadosSalvos.championHistoryA;
+        championHistoryB = dadosSalvos.championHistoryB;
+        championHistoryC = dadosSalvos.championHistoryC;
+        eventLog = dadosSalvos.eventLog;
+
+        lastStandingsA = [...serieA];
+        lastStandingsB = [...serieB];
+        lastStandingsC = [...serieC];
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/* =========================================================
+   RESET (Atualizado com Série C)
+========================================================= */
+
+function resetSimulator() {
+
+    // Guarda escudos e nomes personalizados antes de resetar
+    const escudosSalvos = {};
+    const nomesSalvos = {};
+
+    [...serieA, ...serieB, ...serieC].forEach(club => {
+        if (club.escudo) {
+            escudosSalvos[club.originalName] = club.escudo;
+        }
+        if (club.name !== club.originalName) {
+            nomesSalvos[club.originalName] = club.name;
+        }
+    });
+
+    currentSeason =
+        parseInt(
+            document.getElementById("startSeason").value
+        ) || 2026;
+
+    championHistoryA = {};
+    championHistoryB = {};
+    championHistoryC = {};
+
+    eventLog = [];
+
+    lastStandingsA = [];
+    lastStandingsB = [];
+    lastStandingsC = [];
+
+    createInitialClubs();
+
+    // Reaplica escudos e nomes salvos nos clubes recriados
+    [...serieA, ...serieB, ...serieC].forEach(club => {
+        if (escudosSalvos[club.originalName]) {
+            club.escudo = escudosSalvos[club.originalName];
+        }
+        if (nomesSalvos[club.originalName]) {
+            club.name = nomesSalvos[club.originalName];
+        }
+    });
+
+    render();
+}
+
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
+
+if (!loadGame()) {
+    resetSimulator();
+} else {
+    render();
+}
+</script>
+
+</body>
+</html>
